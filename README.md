@@ -18,7 +18,7 @@ Current Capability
 --------------------
 
  * funs.m    implement some functions that are missing in kernel
- * j.m       Arthur Whitney's one-page interpreter ported to yamma (see http://www.jsoftware.com/jwiki/Essays/Incunabulum)
+ * j.m       [Arthur Whitney's one-page interpreter](http://www.jsoftware.com/jwiki/Essays/Incunabulum) ported to yamma
  * showpi.m  a naive try on printing PI digits
  * euler.m   solutions to some problems in Project Euler 
  * morse.m   morse code
