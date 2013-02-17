@@ -1,3 +1,6 @@
+*.swp
+*.bak
+
 # Object files
 *.o
 
