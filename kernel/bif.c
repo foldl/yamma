@@ -3300,7 +3300,7 @@ def_bif(Attributes)
 
 static MExpr modify_attributes(MSequence *seq, MSymbol sym, bool (*f) (MSymbol, MExpr), _MCONTEXT_)
 {
-    MExpr r = verify_arity_fun(seq, sym_SetAttributes, 2, _CONTEXT);
+    MExpr r = verify_arity_fun(seq, sym, 2, _CONTEXT);
     if (r)
         return r;
     else

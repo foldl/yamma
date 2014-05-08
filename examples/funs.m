@@ -169,7 +169,8 @@ Nest = fNest;
 StringReverse = StringJoin @@ (Reverse @ Characters @ #) &;
 Max = Fold[If[(#1 < #2) === True, #2, #1]&, First @ #, Rest @ #]&;
 Fibonacci = fib2;
-Protect[Map, MapThread, MapIndexed, Tr, Riffle, UpperCase, Partition, Nest];
+ClearAttributes[Fibonacci, {ReadProtected}];
+Protect[Map, MapThread, Total, MapIndexed, Tr, Riffle, UpperCase, Partition, Nest, StringReverse, Max, Fibonacci];
 
 mmM = {{#1[[1, 1]] * #2[[1, 1]] + #1[[1, 2]] * #2[[2, 1]], 
         #1[[1, 1]] * #2[[1, 2]] + #1[[1, 2]] * #2[[2, 2]]}, 
@@ -186,8 +187,10 @@ fib5 = If[# <= 2, 1, Total @ First @ mpow[# - 2, {{1, 1}, {1, 0}}, {{1, 0}, {0, 
 (*
 F[2k]   = F[k]*(F[k]+2F[k-1])
 F[2k+1] = (2F[k]+F[k-1])*(2F[k]-F[k-1]) + 2*(-1)^k
-*)
 fib6 = 
+
+*)
+
 <<"showpi.m";
 
 (*
@@ -199,7 +202,7 @@ mp=: +/ . *
 
 ((-&2); (2 2 $ 1 1 0 1); (2 2 $ 1 0 0 1)) 20
 
-midamble = ToExpression /@ Flatten@Cdr@Cdr@Cdr@(Cons@@(Characters @ binForm[16^^B2AC420F7C8DEBFA69505981BCD028C3]));
+midamble = ToExpression /@ Flatten @ Cdr @ Cdr @ Cdr @ (Cons @@ (Characters @ binForm[16^^B2AC420F7C8DEBFA69505981BCD028C3]));
 toKI = Which[Mod[#, 4] == 0, 1, Mod[#, 4] == 1, I, Mod[#, 4] == 2, -1, True, -I]&;
 (midamble[[#]] toKI[#] ) & /@ Range[128]
 

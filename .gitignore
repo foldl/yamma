@@ -1,6 +1,8 @@
 *.swp
 *.bak
 
+android/
+
 # Object files
 *.o
 
