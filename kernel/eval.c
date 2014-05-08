@@ -142,7 +142,7 @@ static MSequence * Eval_FlattenSequence(MSequence *Seq)
     return r;
 }
 
-static int __cdecl expr_cmp(const MExpr *p1, const MExpr *p2)
+static int expr_cmp(const MExpr *p1, const MExpr *p2)
 {
     const MExpr expr1 = *(const MExpr *)p1;
     const MExpr expr2 = *(const MExpr *)p2;
@@ -746,7 +746,7 @@ sort_para:
         //printf("sorting...");
         if ((h->Symbol->InternalApply == NULL) && (attr & aOrderless) && (MSequence_Len(seq) > 1))
             qsort(seq->pExpr, MSequence_Len(seq), sizeof(MExpr), 
-                    (int (__cdecl *)(const void *,const void *))expr_cmp);
+                    (int (*)(const void *,const void *))expr_cmp);
         //printf("ok\n");
 
         if ((attr & aOneIdentity) && (MSequence_Len(seq) == 1))

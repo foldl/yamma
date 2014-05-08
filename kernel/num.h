@@ -1,6 +1,6 @@
 
-#ifndef _num_h
-#define _num_h
+#ifndef __num_h
+#define __num_h
 
 #include "hash.h"
 #include "mstr.h"

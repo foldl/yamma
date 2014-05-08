@@ -54,7 +54,7 @@ def_bif(CompoundExpression)
 
 #define run_through_bools(sym0, def, checker)                                                               \
 do {                                                                                                        \
-    MDword i = Eval_GetCallTag(_Context);                                                                   \
+    int i = (int)Eval_GetCallTag(_Context);                                                                 \
     if (i > 0)                                                                                              \
     {                                                                                                       \
         MExpr v = Eval_GetCallExpr(_Context);                                                               \
@@ -606,7 +606,7 @@ static MExprIterNextType iter_on_expr(MExpr s, MExpr, MExprIterType it, iter_sta
         return entContinue;
     case eitNormal:
     default:
-       0;//  rr = entGoDeeper;
+       ;//  rr = entGoDeeper;
     }
     return entContinue;
 }

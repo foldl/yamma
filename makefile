@@ -1,19 +1,27 @@
 CFG=Debug
-
-CPP=gcc
-LINK32=gcc
+Platform=Android
 
 ifeq ($(CFG), Debug)
-OUTDIR=./GccDebug
-INTDIR=./GccDebug
+OUTDIR=./Build/$(Platform)Debug
+INTDIR=./Build/$(Platform)Debug
 CPP_PROJ=-c -g -pg -Wall -x c++ -D_DEBUG -o
-LINK32_FLAGS=-pg -Wl,-lsupc++ -o
+LINK32_FLAGS=-pg -Wl,-lsupc++,-lm
 else
-OUTDIR=./GccRelease
-INTDIR=./GccRelease
+OUTDIR=./Build/$(Platform)Release
+INTDIR=./Build/$(Platform)Release
 CPP_PROJ=-c -O3 -Wall -x c++ -o
-LINK32_FLAGS=-Wl,-lsupc++ -O3 -o
+LINK32_FLAGS=-Wl,-lsupc++,-lm -O3
 endif
+
+ifeq ($(Platform), Android)
+CPP=/usr/local/arm-2010.09/bin/arm-none-linux-gnueabi-gcc
+LINK32_FLAGS += --static
+MKDIR=mkdir -p
+else
+CPP=gcc
+MKDIR=mkdir
+endif
+LINK32=$(CPP)
 
 ALL : $(OUTDIR)/yamma.exe
 
@@ -44,7 +52,7 @@ CLEAN :
 	-@erase "$(OUTDIR)\yamma.ilk"
 
 $(OUTDIR) :
-	mkdir -p "$(OUTDIR)"
+	$(MKDIR) "$(OUTDIR)"
 
 {./kernel}.c{$(INTDIR)}.obj:: 
 	$(CPP) $(CPP_PROJ) $@ $<
@@ -74,7 +82,9 @@ LINK32_OBJS= \
 	$(INTDIR)/yamma.obj
 
 $(OUTDIR)/yamma.exe : $(OUTDIR) $(LINK32_OBJS)
-	$(LINK32) $(LINK32_FLAGS)  $@ $(LINK32_OBJS) 
+	$(LINK32) -o $@ $(LINK32_OBJS) $(LINK32_FLAGS)
+
+#$(LINK32) $(LINK32_FLAGS)  $@ $(LINK32_OBJS) 
 
 $(INTDIR)/yamma.obj: yamma.c ./kernel/bif.h ./kernel/moi.h ./kernel/assert.h 	\
    	./kernel/eval.h ./kernel/mm.h ./kernel/encoding.h ./kernel/matcher.h 		\

@@ -10,34 +10,26 @@
 #define ALWAYS(statement, compare, v) ASSERT(statement compare v)
 
 #ifdef _MSC_VER
-
-#define ASSERT(f) \
-do {                    \
-    if (!(f))           \
-    {                   \
-        fprintf(stderr, "%s:%d: ASSERT failed: %s\n", __FILE__, __LINE__, #f);  \
-        __asm {int 3}                                                           \
-        _exit(-1);                                                              \
-    }                                                                           \
-} while (false)
-
-#elif (defined(__GNUC__))
-
-#define ASSERT(f) \
-do {                    \
-    if (!(f))           \
-    {                   \
-        fprintf(stderr, "%s:%d: ASSERT failed: %s\n", __FILE__, __LINE__, #f);  \
-        __asm__ ("int $0x3" );                                                  \
-        _exit(-1);                                                              \
-    }                                                                           \
-} while (false)
-
-#else
-
-#error "unknow compiler"
-
+    #define raise_int   __asm {int 3}
 #endif
+
+#if (defined(__GNUC__) && defined(__MSVCRT__))
+    #define raise_int   __asm__ ("int $0x3" );
+#endif
+
+#ifndef raise_int
+    #define raise_int
+#endif
+
+#define ASSERT(f) \
+do {                    \
+    if (!(f))           \
+    {                   \
+        fprintf(stderr, "%s:%d: ASSERT failed: %s\n", __FILE__, __LINE__, #f);  \
+        raise_int                                                               \
+        exit(-1);                                                              \
+    }                                                                           \
+} while (false)
 
 #define CASSERT(a)                      \
 do {                                    \

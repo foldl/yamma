@@ -2,7 +2,7 @@
 #ifndef expr_h
 #define expr_h
 
-#include <string.h>
+//#include <string.h>
 
 #include "mtype.h"
 #include "mstr.h"

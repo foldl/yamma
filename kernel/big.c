@@ -1355,7 +1355,7 @@ MString Big_BaseToString(MBigNum a, const MInt Base, MInt fractMaxLen = -1)
     if (Base != 10)
     {
         char tempC[100 + 1];
-        basepart = MString_NewCN(tempC, _snprintf(tempC, 100, "%d^^", Base));
+        basepart = MString_NewCN(tempC, snprintf(tempC, 100, "%d^^", Base));
     }
     else
         basepart = MString_NewC("");
@@ -1724,7 +1724,7 @@ MString Big_ToString(MBigNum a, const MInt Base)
 
             // Big_Print(b);
 
-            exp = MString_NewCN(tempC, _snprintf(tempC, 100, "*^%d", Exp));
+            exp = MString_NewCN(tempC, snprintf(tempC, 100, "*^%d", Exp));
         }
         else;
     }
@@ -2249,7 +2249,7 @@ MBigNum Big_ShiftLeft(const MBigNum a, const MInt off)
 
 // Note:
 // Return: 1/-1 if the 2 buffers only differ in the least signaficant Word by "1"
-inline int __fastcall reversecmp_w0(
+inline int reversecmp_w0(
         const MWord * buf1,
         const MWord * buf2,
         size_t count,
@@ -2281,7 +2281,7 @@ inline int __fastcall reversecmp_w0(
     return (count != 0) ? r << 1 : r;
 }
 
-inline int __fastcall reversecmp_w(
+inline int reversecmp_w(
         const MWord * buf1,
         const MWord * buf2,
         size_t count,

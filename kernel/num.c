@@ -434,7 +434,7 @@ MString Num_ToString(MNum a, const MInt Base)
     case ntBig:
         return Big_ToString(t->Big, Base);
     default:
-        pos = _snprintf(tempC, TEMP_LEN, "%f", t->MachR);
+        pos = snprintf(tempC, TEMP_LEN, "%f", t->MachR);
         while (pos > 0)
         {
             if (tempC[pos - 1] == '0')

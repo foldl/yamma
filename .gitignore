@@ -2,6 +2,7 @@
 *.bak
 
 android/
+Build/
 
 # Object files
 *.o

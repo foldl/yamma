@@ -18,6 +18,7 @@
 */
 
 #include <string.h>
+#include <wchar.h>
 
 #include "mstr.h"
 #include "mm.h"

@@ -17,6 +17,7 @@
  *   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <wchar.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>

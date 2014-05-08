@@ -19,6 +19,10 @@ struct MTagString
     MChar *pData;
 };
 
+#ifndef stricmp
+#define stricmp strcasecmp
+#endif
+
 typedef MTagString * MString;
 
 MString MString_NewC(const char *s);

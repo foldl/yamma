@@ -666,8 +666,6 @@ def_bif(Plus)
 
     MNum n = NULL;
     MExpr vc = NULL;
-    bool bFoundNum = false;
-    bool bFoundComplex = false;
     int i = 0;
     MExpr *p = seq->pExpr;
     MExpr r = NULL;
@@ -680,7 +678,6 @@ def_bif(Plus)
         n = Num_Uniquelize((*p)->Num);
         p++;
         i = 1;
-        bFoundNum = true;
     }
     else;
 
@@ -689,7 +686,6 @@ def_bif(Plus)
         if ((*p)->Type == etNum)
         {
             Num_AddBy(n, (*p)->Num);
-            bFoundNum = true;
         }
         else
             break;
@@ -702,11 +698,7 @@ def_bif(Plus)
     {
         if ((*p)->Type == etComplex)
         {
-            MSequence *s;
             MNum re, im;
-
-            bFoundComplex = true;
-            s = MSequence_Create(2);
 
             if (vc == NULL)
             {
