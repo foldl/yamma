@@ -28,7 +28,7 @@
 
 def_bif(EvenQ)
 {
-    verify_arity_with_r(Factorial, 1);
+    verify_arity_with_r(EvenQ, 1);
     r = MSequence_EleAt(seq, 0);
     if (r->Type != etNum)
         return MExpr_CreateSymbol(sym_False);
@@ -37,7 +37,7 @@ def_bif(EvenQ)
 
 def_bif(OddQ)
 {
-    verify_arity_with_r(Factorial, 1);
+    verify_arity_with_r(OddQ, 1);
     r = MSequence_EleAt(seq, 0);
     if (r->Type != etNum)
         return MExpr_CreateSymbol(sym_False);
@@ -108,7 +108,7 @@ def_bif(Factorial2)
     MNum backn;
     MNum step;
     MDword shift = 0;
-    verify_arity_with_r(Factorial, 1);
+    verify_arity_with_r(Factorial2, 1);
     r = MSequence_EleAt(seq, 0);
     if ((r->Type != etNum) || !Num_IsInt(r->Num) || Num_IsNeg(r->Num))
         return MExpr_CreateHeadSeqX(sym_Factorial2, seq);
@@ -158,7 +158,7 @@ def_bif(Quotient)
 
 def_bif(Mod)
 {
-	verify_arity_with_r(Quotient, 2);
+	verify_arity_with_r(Mod, 2);
 	if (!check_arg_types("NN", seq, sym_Mod, false, _CONTEXT))
 		return MExpr_CreateHeadSeq(sym_Mod, seq);
 	return MExpr_CreateNumX(Num_Mod(MSequence_EleAt(seq, 0)->Num, MSequence_EleAt(seq, 1)->Num));
@@ -166,7 +166,7 @@ def_bif(Mod)
 
 def_bif(QuotientRemainder)
 {
-	verify_arity_with_r(Quotient, 2);
+	verify_arity_with_r(QuotientRemainder, 2);
 	if (!check_arg_types("NN", seq, sym_QuotientRemainder, false, _CONTEXT))
 		return MExpr_CreateHeadSeq(sym_QuotientRemainder, seq);
     else
@@ -187,7 +187,7 @@ def_bif(Ceiling)
 	MNum n;
 	MNum intpart;
 	MNum fract;
-	verify_arity_with_r(Quotient, 1);
+	verify_arity_with_r(Ceiling, 1);
 	if (!check_arg_types("N", seq, sym_Mod, false, _CONTEXT))
 		return MExpr_CreateHeadSeq(sym_Mod, seq);
 	n = MSequence_EleAt(seq, 0)->Num;
@@ -204,7 +204,7 @@ def_bif(Floor)
 	MNum n;
 	MNum intpart;
 	MNum fract;
-	verify_arity_with_r(Quotient, 1);
+	verify_arity_with_r(Floor, 1);
 	if (!check_arg_types("N", seq, sym_Mod, false, _CONTEXT))
 		return MExpr_CreateHeadSeq(sym_Mod, seq);
 	n = MSequence_EleAt(seq, 0)->Num;
@@ -219,7 +219,7 @@ def_bif(Floor)
 def_bif(Round)
 {
 	MNum n;
-	verify_arity_with_r(Quotient, 1);
+	verify_arity_with_r(Round, 1);
 	if (!check_arg_types("N", seq, sym_Mod, false, _CONTEXT))
 		return MExpr_CreateHeadSeq(sym_Mod, seq);
 	n = MSequence_EleAt(seq, 0)->Num;
