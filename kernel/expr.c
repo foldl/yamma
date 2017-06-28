@@ -501,6 +501,8 @@ MSequence *MSequence_Create(const MInt len)
     MSequence *s = MXRefObj_Create(MSequence, Type_MSequence);
     s->Len = len;
 
+    ASSERT(len >= 0);
+
     make_seq_cap(s, len);
     
     return s;
@@ -621,10 +623,10 @@ MSequence *MSequence_SetAt(MSequence *s, const MInt i, MExpr expr)
 
     if ((i >= 0) && (i < s->Len))
     {
+        XRef_IncRef(expr);
         if (s->pExpr[i])
             XRef_DecRef(s->pExpr[i]);
         s->pExpr[i] = expr;
-        XRef_IncRef(expr);
     }
     return s;
 }
@@ -717,6 +719,12 @@ void       MSequence_ReleaseStatic(MSequence *s)
             MExpr_Release(s->pExpr[i]);
     }
     memset(s, 0, sizeof(*s));
+}
+
+void MSequence_Shorten(MSequence *s, const int new_len)
+{
+    ASSERT_REF_CNT(s, 0);
+    s->Len = min(s->Len, new_len);
 }
 
 //void       MSequence_Release(MSequence *s)
@@ -995,7 +1003,7 @@ static MString MExpr_Dispose(MExpr s)
 MExpr MExpr_SetTo(MExpr dest, MExpr s)
 {
     MExpr_Dispose(dest);
-    memcpy(dest, s, sizeof(dest));
+    memcpy(dest, s, sizeof(*dest));
     switch (s->Type)
     {
     case etNum:         XRef_IncRef(s->Num); break;

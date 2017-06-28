@@ -1,16 +1,17 @@
 CFG=Debug
-Platform=Android
+Platform=win
+# Android
 
 ifeq ($(CFG), Debug)
 OUTDIR=./Build/$(Platform)Debug
 INTDIR=./Build/$(Platform)Debug
-CPP_PROJ=-c -g -pg -Wall -x c++ -D_DEBUG -o
-LINK32_FLAGS=-pg -Wl,-lsupc++,-lm
+CPP_PROJ=-m32 -c -g -pg -Wall -x c++ -D_DEBUG -o
+LINK32_FLAGS=-m32 -pg -Wl,-lsupc++,-lm
 else
 OUTDIR=./Build/$(Platform)Release
 INTDIR=./Build/$(Platform)Release
-CPP_PROJ=-c -O3 -Wall -x c++ -o
-LINK32_FLAGS=-Wl,-lsupc++,-lm -O3
+CPP_PROJ=-m32 -c -O3 -Wall -x c++ -o
+LINK32_FLAGS=-m32 -Wl,-lsupc++,-lm -O3
 endif
 
 ifeq ($(Platform), Android)

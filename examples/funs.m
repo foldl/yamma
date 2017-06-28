@@ -16,8 +16,6 @@ fMapThread0 = Function[{f, left, right, acc}, If[Length[left] > 0,
                                                  fMapThread0[f, Rest @ left, Rest @ right, Append[acc, f[First @ left, First @ right]]], 
                                                  acc]];
 fMapThread = Function[{f, lst}, fMapThread0[f, First @ lst, Last @ lst, {}]];
-fMap = Function[{f, lst}, If[Length @ lst > 0, Flatten[Fold[Cons[f[#2], #1]&, Null, lst], Reverse], {}]];
-fNest = Function[{f, x, n}, If[n > 0, fNest[f, f[x], n - 1], x]];
 fNestList0 = Function[{f, x, n, Acc}, If[n > 0, 
                                             temp = f[x]; 
                                             fNestList0[f, temp, n - 1, Append[Acc, temp]]
@@ -33,7 +31,7 @@ fFixedPointList0 = Function[{f, x, nx, acc}, If[nx == x, acc, fFixedPointList0[f
 fFixedPointList = Function[{f, x}, fFixedPointList0[f, x, f[x], {}]];
 iPi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086;
 fSign = If[EvenQ @ #, 1, -1]&;
-fSin2 = Function[{x}, 1.0`80 fTotal[fMap[fSign @ # x ^ (2 # + 1) / Factorial[2 # + 1] &, Range[0, 16]]]]; (* now, x is in [0, Pi/2) *)
+fSin2 = Function[{x}, 1.0`80 fTotal[Map[fSign @ # x ^ (2 # + 1) / Factorial[2 # + 1] &, Range[0, 16]]]]; (* now, x is in [0, Pi/2) *)
 fSin1 = Function[{x}, If[x > iPi / 2, fSin2[iPi - x], fSin2[x]]];
 fSin0 = Function[{x}, If[x > iPi, - fSin1[x - iPi], fSin1[x]]];
 fSin = Function[{x}, fSin0 @ Mod[x, 2 iPi]];
@@ -52,9 +50,9 @@ hexForm = baseForm[#, 16]&;
 binForm = baseForm[#, 2]&;
 
 f1 = Factorial[#1] / (Factorial[#1 - #2] Factorial[#2])&;
-fMaken = Function[{n}, fMap[{n, #}&, Range[1, n]]];
-fMakeAll = Join @@ fMap[fMaken, Range[10]];
-fMap[f1[First @ #, Last @ #]&, fMakeAll];
+fMaken = Function[{n}, Map[{n, #}&, Range[1, n]]];
+fMakeAll = Join @@ Map[fMaken, Range[10]];
+Map[f1[First @ #, Last @ #]&, fMakeAll];
 
 fSplit0 = Function[{f, run, Acc, l}, 
                     If[Length[l] > 0
@@ -139,10 +137,6 @@ StrWords = Function[{s},
             ToCharacterCode @ s]
 ];
 
-fRiffle = Function[{lst, x}, Rest @ (Join @@ fMap[{x, #} &, lst])];
-
-fUpperCase = FromCharacterCode @ fMap[If[And[# >= 92, # <= 122], # - (97 - 65), #]&, ToCharacterCode @ #]&;
-
 cons2lst = If[ConsQ @ #, Flatten[#, Reverse], {}]&;
 
 fPartition = Function[{lst, len},
@@ -156,21 +150,14 @@ fPartition = Function[{lst, len},
                           ], {{Null, 0}, Null}, lst]
 ];
 
-Unprotect[Map, MapThread, Total, MapIndexed, Tr, Riffle, UpperCase, Partition, Nest, StringReverse, Max, Fibonacci];
-Map = fMap;
+Unprotect[MapThread, Total, MapIndexed, Riffle, UpperCase, Partition, Max, Fibonacci];
 MapThread = fMapThread;
 MapIndexed = fMapIndexed;
-Tr = Times @@ # &;
 Total = Plus @@ #&;
-Riffle = fRiffle;
-UpperCase = fUpperCase;
-Partition = fPartition;
-Nest = fNest;
-StringReverse = StringJoin @@ (Reverse @ Characters @ #) &;
 Max = Fold[If[(#1 < #2) === True, #2, #1]&, First @ #, Rest @ #]&;
 Fibonacci = fib2;
 ClearAttributes[Fibonacci, {ReadProtected}];
-Protect[Map, MapThread, Total, MapIndexed, Tr, Riffle, UpperCase, Partition, Nest, StringReverse, Max, Fibonacci];
+Protect[MapThread, Total, MapIndexed, Riffle, UpperCase, Partition, Max, Fibonacci];
 
 mmM = {{#1[[1, 1]] * #2[[1, 1]] + #1[[1, 2]] * #2[[2, 1]], 
         #1[[1, 1]] * #2[[1, 2]] + #1[[1, 2]] * #2[[2, 2]]}, 

@@ -102,7 +102,7 @@ def_bif(FoldList)
 
     if (NULL == ps)
     {
-        if (check_arg_types("..X", seq, sym_Fold, true, _CONTEXT))
+        if (check_arg_types("..X", seq, sym_FoldList, true, _CONTEXT))
         {
             rseq = MSequence_Create(MSequence_Len(lseq) + 1);           
             rexpr = MExpr_CreateHeadSeqX(MSequence_EleAt(seq, 2)->HeadSeq.Head, rseq);
@@ -148,6 +148,198 @@ def_bif(FoldList)
     return rexpr;
 }
 
+//Partition[list,n]     non-overlapping sublists of length n.
+//Partition[list,n,d]   offset d
+//Partition[list,{n1,n2,...}]                   different length
+//Partition[list,{n1,n2,...},{d1,d2,...}]       different length & offset
+def_bif(Partition)
+{
+    MExpr h;
+    MSequence *ls;
+    MSequence *rs;
+    if (check_arg_types("Xi", seq, sym_Partition, false, _CONTEXT))
+    {
+        int i;
+        h  = EleAt(seq, 0)->HeadSeq.Head;
+        ls = EleAt(seq, 0)->HeadSeq.pSequence;
+        int len = Num_ToInt(EleAt(seq, 1)->Num);
+        if (len < 1)
+            goto arg_error;
+        
+        rs = MSequence_Create(MSequence_Len(ls) / len);
+        for (i = 0; i < MSequence_Len(rs); i++)
+        {
+            EleAt(rs, i) = MExpr_CreateHeadSeqX(h, MSequence_Copy(ls, i * len, len));
+        }
+    }
+    else if (check_arg_types("Xii", seq, sym_Partition, false, _CONTEXT))
+    {
+        int i;
+        h  = EleAt(seq, 0)->HeadSeq.Head;
+        ls = EleAt(seq, 0)->HeadSeq.pSequence;
+        int len     = Num_ToInt(EleAt(seq, 1)->Num);
+        int offset  = Num_ToInt(EleAt(seq, 2)->Num);
+        if ((len < 1) || (offset < 1))
+            goto arg_error;
+        
+        int cur = 0;
+        if (MSequence_Len(ls) >= len)
+            rs = MSequence_Create((MSequence_Len(ls) - len) / offset + 1);
+        else
+            rs = MSequence_Create(0);
+
+        for (i = 0; i < MSequence_Len(rs); i++)
+        {
+            EleAt(rs, i) = MExpr_CreateHeadSeqX(h, MSequence_Copy(ls, cur, len));
+            cur += offset;
+        }
+    }
+    else if (check_arg_types("X{i*}", seq, sym_Partition, false, _CONTEXT))
+    {
+        int i;
+        int cur = 0;
+        MSequence *lenseq;
+        h  = EleAt(seq, 0)->HeadSeq.Head;
+        ls = EleAt(seq, 0)->HeadSeq.pSequence;
+        lenseq = EleAt(seq, 1)->HeadSeq.pSequence;
+        for (i = 0; i < MSequence_Len(lenseq); i++)
+            if (Num_ToInt(EleAt(lenseq, i)->Num) < 1)
+                goto arg_error;
+
+        rs = MSequence_Create(MSequence_Len(lenseq));
+        for (i = 0; i < MSequence_Len(rs); i++)
+        {
+            int len = Num_ToInt(EleAt(lenseq, i)->Num);
+            if (cur + len > MSequence_Len(ls))
+            {
+                MSequence_Shorten(rs, i);
+                break;
+            }
+
+            EleAt(rs, i) = MExpr_CreateHeadSeqX(h, 
+                    MSequence_Copy(ls, cur, len));
+            cur += len;
+        }
+    }
+    else if (check_arg_types("X{i*}{i*}", seq, sym_Partition, false, _CONTEXT))
+    {
+        int i;
+        int cur = 0;
+        MSequence *lenseq;
+        MSequence *offseq;
+        h  = EleAt(seq, 0)->HeadSeq.Head;
+        ls = EleAt(seq, 0)->HeadSeq.pSequence;
+        lenseq = EleAt(seq, 1)->HeadSeq.pSequence;
+        offseq = EleAt(seq, 1)->HeadSeq.pSequence;
+        if (MSequence_Len(lenseq) != MSequence_Len(offseq)) goto arg_error;
+        for (i = 0; i < MSequence_Len(lenseq); i++)
+            if (Num_ToInt(EleAt(lenseq, i)->Num) < 1)
+                goto arg_error;
+
+        rs = MSequence_Create(MSequence_Len(lenseq));
+        for (i = 0; i < MSequence_Len(rs); i++)
+        {
+            cur += Num_ToInt(EleAt(offseq, i)->Num);
+            int len = Num_ToInt(EleAt(lenseq, i)->Num);
+            if (cur + len > MSequence_Len(ls))
+            {
+                MSequence_Shorten(rs, i);
+                break;
+            }
+
+            EleAt(rs, i) = MExpr_CreateHeadSeqX(h, MSequence_Copy(ls, cur, len));
+        }
+    }
+    else
+        goto arg_error;
+
+    return MExpr_CreateHeadSeqX(h, rs);
+
+arg_error:    
+	return MExpr_CreateHeadSeq(sym_Partition, seq);
+}
+
+MExpr Riffle0(MSequence *seq, const int n context_param)
+{
+    MExpr h;
+    MSequence *ls;
+    MSequence *rs;
+    int ri = 0;
+    int i = 0;
+    int group = n - 1;
+    int insert_no;
+    h  = EleAt(seq, 0)->HeadSeq.Head;
+    ls = EleAt(seq, 0)->HeadSeq.pSequence;
+    insert_no = (MSequence_Len(ls) + group - 1) / group - 1;
+    if (MSequence_Len(ls) < n) 
+    {
+        rs = ls;
+        XRef_IncRef(rs);
+        goto done;
+    }
+    rs = MSequence_Create(MSequence_Len(ls) + insert_no);
+    if (check_arg_types("X{.*}", seq, sym_Riffle, false, _CONTEXT))
+    {
+        MSequence *xs;
+        int xi = 0;
+        xs = EleAt(seq, 1)->HeadSeq.pSequence;
+        
+        for (int j = 0; j < insert_no; j++)
+        {
+            for (int k = 0; k < group; k++, ri++, i++)
+                MSequence_SetAt(rs, ri, EleAt(ls, i)); 
+
+            MSequence_SetAt(rs, ri++, EleAt(xs, xi)); 
+            xi++; 
+            if (xi >= MSequence_Len(xs)) xi = 0;
+        }
+        for (; i < MSequence_Len(ls); i++, ri++)
+            MSequence_SetAt(rs, ri, EleAt(ls, i));
+    }
+    else if (check_arg_types("X.", seq, sym_Riffle, false, _CONTEXT))
+    {
+        MExpr x = EleAt(seq, 1);
+        
+        for (int j = 0; j < insert_no; j++)
+        {
+            for (int k = 0; k < group; k++, ri++, i++)
+                MSequence_SetAt(rs, ri, EleAt(ls, i)); 
+
+            MSequence_SetAt(rs, ri++, x); 
+        }
+        for (; i < MSequence_Len(ls); i++, ri++)
+            MSequence_SetAt(rs, ri, EleAt(ls, i));
+    }
+    else
+        goto arg_error;
+done:
+    return MExpr_CreateHeadSeqX(h, rs);
+
+arg_error:    
+	return MExpr_CreateHeadSeq(sym_Riffle, seq);  
+};
+
+// Riffle[{e1,e2,...},x]
+// Riffle[{e1,e2,...},{x1,x2,...}]
+// Riffle[{e1,e2,...},x,n]
+def_bif(Riffle)
+{
+    if (check_arg_types("X.i", seq, sym_Riffle, false, _CONTEXT))
+    {  
+        int n = Num_ToInt(EleAt(seq, 2)->Num);
+        if (n < 2) return MExpr_CreateHeadSeq(sym_Riffle, seq);  
+        MSequence *ne = MSequence_Copy(seq, 0, 2);
+        
+        MExpr r = Riffle0(ne, n, _CONTEXT);
+        MSequence_Release(ne);
+        return r;
+    }
+    else if (check_arg_types("X.", seq, sym_Riffle, true, _CONTEXT))
+        return Riffle0(seq, 2, _CONTEXT);
+    else
+        return MExpr_CreateHeadSeq(sym_Riffle, seq);  
+}
+
 def_bif(StringJoin)
 {
     MString r;
@@ -156,9 +348,7 @@ def_bif(StringJoin)
     if (MSequence_Len(seq) == 0)
         return MExpr_CreateStringX(MString_NewC(""));
 
-	if (check_arg_types("{S*}", seq, sym_StringJoin, false, _CONTEXT))
-		ps = MSequence_EleAt(seq, 0)->HeadSeq.pSequence;
-    else if (!check_arg_types("S*", seq, sym_StringJoin, true, _CONTEXT))
+    if (!check_arg_types("S*", seq, sym_StringJoin, true, _CONTEXT))
 		return MExpr_CreateHeadSeq(sym_StringJoin, seq);
 
     {
@@ -171,6 +361,33 @@ def_bif(StringJoin)
 			MString_Cat(r, MSequence_EleAt(ps, i)->Str);
 		return MExpr_CreateStringX(r);
 	}
+}
+
+def_bif(ToUpperCase)
+{
+    MString s;
+    if (!check_arg_types("S", seq, sym_ToUpperCase, true, _CONTEXT))
+		return MExpr_CreateHeadSeq(sym_ToUpperCase, seq);
+    s = MString_ToUpper(EleAt(seq, 0)->Str);
+    return MExpr_CreateStringX(s);
+}
+
+def_bif(ToLowerCase)
+{
+    MString s;
+    if (!check_arg_types("S", seq, sym_ToLowerCase, true, _CONTEXT))
+		return MExpr_CreateHeadSeq(sym_ToLowerCase, seq);
+    s = MString_ToLower(EleAt(seq, 0)->Str);
+    return MExpr_CreateStringX(s);
+}
+
+def_bif(StringReverse)
+{
+    MString s;
+    if (!check_arg_types("S", seq, sym_ToLowerCase, true, _CONTEXT))
+		return MExpr_CreateHeadSeq(sym_ToLowerCase, seq);
+    s = MString_Unique(EleAt(seq, 0)->Str);
+    return MExpr_CreateStringX(MString_Reverse(s));
 }
 
 static int GetExprDepth(const MExpr expr)
@@ -192,158 +409,104 @@ static int GetExprDepth(const MExpr expr)
     return imax + 1;
 }
 
-static MExpr BIF_Map0(const MExpr f, const MExpr lst,
-                     const int FromLevel, const int EndLevel, 
-                     const int NegFromLevel, const int NegEndLevel, 
-                     const bool bHeads context_param)
+static MExpr map_down(const MExpr f, const MExpr lst,
+                      const int FromLevel, const int EndLevel,
+                      const int CurLevel,
+                      const bool bHeads context_param)
 {
-    MExpr rDepthFirst = NULL;
-    bool bActive = false;       // has this *list* been "mapped"?
-    bool bTranversed = true;
-
-    // check this level: positive level
-    if (FromLevel == 0)
-    {
-        MSequence *t = MSequence_Create(1);
-        MExpr tr = BIF_Map0(f, lst, 
-                            FromLevel - 1, EndLevel - 1,
-                            NegFromLevel + 1, NegEndLevel + 1, 
-                            bHeads, _CONTEXT);
-        MSequence_SetAtX(t, 0, tr);
-        rDepthFirst = MExpr_CreateHeadSeqX(f, t);
-    }
-    else;
-
-    if (lst->Type != etHeadSeq)
+    MExpr ne;
+    if (CurLevel > EndLevel) 
     {
         XRef_IncRef(lst);
-        if (rDepthFirst) MExpr_Release(rDepthFirst);
         return lst;
     }
-
-    if (FromLevel == 1)
+    
+    if (lst->Type == etHeadSeq)
     {
-        int i;
         MExpr h = lst->HeadSeq.Head;
         MSequence *ps = lst->HeadSeq.pSequence;
         MSequence *t = MSequence_Create(MSequence_Len(ps));
 
-        for (i = 0; i < MSequence_Len(ps); i++)
+        for (int i = 0; i < MSequence_Len(ps); i++)
         {
-            MExpr tt = MSequence_EleAt(ps, i);
-            MSequence *ele = MSequence_Create(1);
-            MExpr tr = BIF_Map0(f, tt, 
-                                FromLevel - 1, EndLevel - 1,
-                                NegFromLevel + 1, NegEndLevel + 1, 
+            MExpr tr = map_down(f, MSequence_EleAt(ps, i), 
+                                FromLevel, EndLevel,
+                                CurLevel + 1,
                                 bHeads, _CONTEXT);
-            
-            MSequence_SetAtX(ele, 0, tr);
-            MSequence_SetAtX(t, i, MExpr_CreateHeadSeqX(f, ele));
+            MSequence_SetAtX(t, i, tr);
         }
 
-        if (bHeads)
-        {
-            MSequence *ele = MSequence_Create(1);
-            MSequence_SetAt(ele, 0, h);
-            rDepthFirst = MExpr_CreateHeadXSeqX(MExpr_CreateHeadSeqX(f, ele), t);
-        }
-        else
-            rDepthFirst = MExpr_CreateHeadSeqX(h, t);
-
-        bActive = true;
+        ne = MExpr_CreateHeadSeqX(h, t);
     }
     else
     {
-        bTranversed = false;
+        ne = lst;
+        XRef_IncRef(lst);
     }
 
-    // now check neg level
-    // TODO: optimize
-    if (!bActive)
+    if ((CurLevel >= FromLevel) && (CurLevel <= EndLevel))
     {
-        int NegLevel = -GetExprDepth(rDepthFirst);
-        if ((NegLevel >= NegFromLevel) && (NegLevel <= NegEndLevel))
-        {
-            MSequence *t = MSequence_Create(1);
-            MExpr tr = BIF_Map0(f, rDepthFirst, 
-                                FromLevel - 1, EndLevel - 1,
-                                NegFromLevel + 1, NegEndLevel + 1, 
-                                bHeads, _CONTEXT);
-            MSequence_SetAtX(t, 0, tr);
-            rDepthFirst = MExpr_CreateHeadSeqX(f, t);
-        }
-        else
-        {
-            NegLevel--;
-            if ((NegLevel >= NegFromLevel) && (NegLevel <= NegEndLevel))
-            {
-                int i;
-                MExpr h = lst->HeadSeq.Head;
-                MSequence *ps = lst->HeadSeq.pSequence;
-                MSequence *t = MSequence_Create(MSequence_Len(ps));
-
-                for (i = 0; i < MSequence_Len(ps); i++)
-                {
-                    MExpr tt = MSequence_EleAt(ps, i);
-                    MSequence *ele = MSequence_Create(1);
-                    MExpr tr = BIF_Map0(f, tt, 
-                                        FromLevel - 1, EndLevel - 1,
-                                        NegFromLevel + 1, NegEndLevel + 1, 
-                                        bHeads, _CONTEXT);
-                    
-                    MSequence_SetAtX(ele, 0, tr);
-                    MSequence_SetAtX(t, i, MExpr_CreateHeadSeqX(f, ele));
-                }
-
-                if (bHeads)
-                {
-                    MSequence *ele = MSequence_Create(1);
-                    MSequence_SetAt(ele, 0, h);
-                    rDepthFirst = MExpr_CreateHeadXSeqX(MExpr_CreateHeadSeqX(f, ele), t);
-                }
-                else
-                    rDepthFirst = MExpr_CreateHeadSeqX(h, t);
-            }
-        }
+        MSequence *ele = MSequence_Create(1);
+        MSequence_SetAtX(ele, 0, ne);
+        return MExpr_CreateHeadSeqX(f, ele);
     }
-    else;
+    else
+        return ne;
+}
 
-    // go somewhere deeper
-    if (!bTranversed)
+static MExpr map_up(const MExpr f, const MExpr lst,
+                      const int FromLevel, const int EndLevel,
+                      int *CurLevel,
+                      const bool bHeads context_param)
+{
+    MExpr ne;
+    if (lst->Type == etHeadSeq)
     {
-        int i;
         MExpr h = lst->HeadSeq.Head;
         MSequence *ps = lst->HeadSeq.pSequence;
         MSequence *t = MSequence_Create(MSequence_Len(ps));
-
-        for (i = 0; i < MSequence_Len(ps); i++)
+        int level;
+        for (int i = 0; i < MSequence_Len(ps); i++)
         {
-            MSequence_SetAtX(t, i, 
-                    BIF_Map0(f, MSequence_EleAt(ps, i), 
-                             FromLevel - 1, EndLevel - 1, 
-                             NegFromLevel + 1, NegEndLevel + 1, 
-                             bHeads, _CONTEXT));
+            MExpr tr = map_up(f, MSequence_EleAt(ps, i), 
+                                FromLevel, EndLevel,
+                                &level,
+                                bHeads, _CONTEXT);
+            MSequence_SetAtX(t, i, tr);
         }
-
-        rDepthFirst = MExpr_CreateHeadSeqX(h, t);
+        ne = MExpr_CreateHeadSeqX(h, t);
+        *CurLevel = level - 1;
+    }
+    else
+    {
+        ne = lst;
+        XRef_IncRef(lst);
+        *CurLevel = -1;
     }
 
-    return rDepthFirst;
-}
-
-static MExpr BIF_Map1(const MExpr f, const MExpr lst,
-                     const int FromLevel, const int EndLevel, const bool bHeads context_param)
-{
-    //MExpr h = lst->HeadSeq.Head;
-    //MSequence *ps = lst->HeadSeq.pSequence;
-    return NULL;
+    if ((*CurLevel >= FromLevel) && (*CurLevel <= EndLevel))
+    {
+        MSequence *ele = MSequence_Create(1);
+        MSequence_SetAtX(ele, 0, ne);
+        return MExpr_CreateHeadSeqX(f, ele);
+    }
+    else 
+        return ne;
 }
 
 static MExpr BIF_Map(const MExpr f, const MExpr lst, 
                     const int FromLevel, const int EndLevel, const bool bHeads context_param)
 {
-    return EndLevel >= 0 ? BIF_Map0(f, lst, FromLevel, EndLevel, 0, 0, bHeads, _CONTEXT) : 
-            BIF_Map1(f, lst, FromLevel, EndLevel, bHeads, _CONTEXT);
+    int level;
+    if (FromLevel > EndLevel)
+    {
+        XRef_IncRef(lst);
+        return lst;
+    }
+
+    return EndLevel >= 0 ? 
+            map_down(f, lst, FromLevel, EndLevel, 0, bHeads, _CONTEXT) : 
+            map_up(f, lst, FromLevel, EndLevel, &level, bHeads, _CONTEXT);
 }
 
 // Args:
@@ -417,7 +580,7 @@ def_bif(Range)
     MSequence *ps;
     MExpr rr = NULL;
 
-    if (check_arg_types("N", seq, sym_Map, false, _CONTEXT))
+    if (check_arg_types("N", seq, sym_Range, false, _CONTEXT))
     {
         int r = Num_ToInt(MSequence_EleAt(seq, 0)->Num);
         if (r >= 1)
@@ -438,7 +601,7 @@ def_bif(Range)
         }
         else;
     }
-    else if (check_arg_types("NN", seq, sym_Map, false, _CONTEXT))
+    else if (check_arg_types("NN", seq, sym_Range, false, _CONTEXT))
     {
         MNum start = MSequence_EleAt(seq, 0)->Num;
         MNum end = MSequence_EleAt(seq, 1)->Num;
@@ -475,7 +638,7 @@ def_bif(Range)
         Num_Release(acc);
         Num_Release(one);
     }
-    else if (check_arg_types("NNN", seq, sym_Map, true, _CONTEXT))
+    else if (check_arg_types("NNN", seq, sym_Range, true, _CONTEXT))
     {
         MNum start = MSequence_EleAt(seq, 0)->Num;
         MNum end = MSequence_EleAt(seq, 1)->Num;
@@ -524,7 +687,7 @@ def_bif(Nest)
 
     if (NULL == ps)
     {
-        if (check_arg_types("..N", seq, sym_NestList, true, _CONTEXT))
+        if (check_arg_types("..N", seq, sym_Nest, true, _CONTEXT))
         {
             counter = Num_ToInt(MSequence_EleAt(seq, 2)->Num);
             if (counter > 0)

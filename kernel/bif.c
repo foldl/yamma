@@ -351,6 +351,7 @@ bool check_arg_types_inner(const char *types, MSequence *seq, const MSymbol sym,
 						   const MBool bReport, const int Level, const int OutterPos, int *TypeLen context_param)
 {
     int i = 0;
+    int pat_len = 0;
     char c = '\0';
 	char lc = '\0';
     int len = 0;
@@ -375,14 +376,12 @@ bool check_arg_types_inner(const char *types, MSequence *seq, const MSymbol sym,
             }
             else if (i < MSequence_Len(seq))           
             {
-				int j = i;
-				for (; j < MSequence_Len(seq); j++)
-					if (!check_arg_type(lc, MSequence_EleAt(seq, j), sym, bReport, Level == 0 ? j : OutterPos, _CONTEXT))
+				for (; i < MSequence_Len(seq); i++)
+					if (!check_arg_type(lc, MSequence_EleAt(seq, i), sym, bReport, 
+                                Level == 0 ? i : OutterPos, _CONTEXT))
 						return false;
-                return true;
 			}
-            else
-                return true;
+            else;
             break;
         case '+': 
             if (i >= MSequence_Len(seq))
@@ -399,16 +398,14 @@ bool check_arg_types_inner(const char *types, MSequence *seq, const MSymbol sym,
             }
             else
             {
-				int j = i;
-				for (; j < MSequence_Len(seq); j++)
-					if (!check_arg_type(lc, MSequence_EleAt(seq, j), sym, bReport, Level == 0
-                                ? j : OutterPos, _CONTEXT))
+				for (; i < MSequence_Len(seq); i++)
+					if (!check_arg_type(lc, MSequence_EleAt(seq, i), sym, bReport, Level == 0
+                                ? i : OutterPos, _CONTEXT))
 						return false;
-                return true;
 			}
             break;
         case '}':
-            *TypeLen = i;
+            *TypeLen = pat_len;
             goto check_number;
             break;
         case '{':
@@ -422,17 +419,18 @@ bool check_arg_types_inner(const char *types, MSequence *seq, const MSymbol sym,
                                  &len, _CONTEXT))
                 return false;
             types += len;   
-            c = *types++;
-            ASSERT(c == '}');
+            c = *types++; ASSERT(c == '}');
+            i++;
             break;
         default:
             if (i >= MSequence_Len(seq)) return false;
             t = MSequence_EleAt(seq, i);
 
             if (!check_arg_type(c, t, sym, bReport, Level == 0 ? i : OutterPos, _CONTEXT))
-                return false;;
+                return false;
+            i++;
         }
-        i++;
+        pat_len++;       
     }
 
 check_number:
@@ -3579,8 +3577,8 @@ static MExprIterNextType hash_on_expr(MExpr s, MExpr, MExprIterType it, MHash *r
                                                   MString_Len(s->Symbol->Name), 0)); 
                              break;
         case etCons:
-        case etHeadSeq:
-                             rr = entGoDeeper;
+        case etHeadSeq:                          
+                             rr = entGoDeeper;                            
         }
     }
 

@@ -43,13 +43,15 @@ MString MString_Join(const MString s, const MString cat);
 MInt    MString_Compare(const MString s1, const MString s2);
 MBool   MString_SameQ(const MString s1, const MString s2);
 MString MString_SetLen(MString s1, const int Len);
-MString MString_Reverse(MString s);
+MString MString_ToUpper(MString s);
+MString MString_ToLower(MString s);
 
 // s will be modified, so RefCount should be 0, or else, something strange will happen
 // MString is always not changable, except for this function
 MString MString_Cat(MString s, const MString cat);
 MString MString_CatChar(MString s, const MChar cat);
 MString MString_CatCN(MString s, const char *cz, const int n);
+MString MString_Reverse(MString s);
 
 #define MString_Len(s)  ((s)->Len)
 #define MString_Cap(s)  ((s)->Capacity)

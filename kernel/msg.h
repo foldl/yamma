@@ -17,5 +17,6 @@ void Msg_Emit(const char *format, ...);
 void Msg_EmitLn(const char *format, ...);
 void Msg_Emit(const MString s);
 void Msg_EmitLn(const MString s);
+void Msg_Emit(MExpr expr);
 
 #endif

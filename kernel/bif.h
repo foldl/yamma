@@ -115,10 +115,16 @@ def_bif(FoldList);
 def_bif(Fold);
 
 def_bif(StringJoin);
+def_bif(ToUpperCase);
+def_bif(ToLowerCase);
+def_bif(StringReverse);
+
 def_bif(Map);
 def_bif(Range);
 def_bif(Nest);
 def_bif(NestList);
+def_bif(Partition);
+def_bif(Riffle);
 
 // helpers
 bool check_arg_types(const char *types, MSequence *seq, const MSymbol sym, const MBool bReport context_param);

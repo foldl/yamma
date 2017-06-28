@@ -74,3 +74,10 @@ void Msg_Emit(const MString s)
     fwprintf(stdout, str);
     YM_free(str);
 }
+
+void Msg_Emit(MExpr expr)
+{
+    MString s = MExpr_ToFullForm(expr);
+    Msg_EmitLn(s);
+    MString_Release(s);
+}

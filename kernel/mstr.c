@@ -398,6 +398,34 @@ MString MString_Reverse(MString s)
     return s;
 }
 
+MString MString_ToUpper(MString s)
+{
+    int i;
+    MString r = MString_Unique(s);
+    MChar *p = r->pData;
+    for (i = 0; i < s->Len; i++)
+    {
+        MChar t = p[i];
+        if (('a' <= t) && (t <= 'a'))
+            p[i] = t - 'a' + 'A';
+    }
+    return r;
+}
+
+MString MString_ToLower(MString s)
+{
+    int i;
+    MString r = MString_Unique(s);
+    MChar *p = r->pData;
+    for (i = 0; i < s->Len; i++)
+    {
+        MChar t = p[i];
+        if (('A' <= t) && (t <= 'Z'))
+            p[i] = t - 'A' + 'a';
+    }
+    return r;
+}
+
 MString MString_SetLen(MString s1, const int Len)
 {
     s1->Len = min(s1->Capacity, Len);

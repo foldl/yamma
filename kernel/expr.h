@@ -263,8 +263,10 @@ MExpr      MSequence_GetAt(MSequence *s, const MInt i);
 #define    MSequence_Len(s) ((s)->Len)
 #define    MSequence_Release XRef_DecRef
 #define    MSequence_EleAt(s, i) ((s)->pExpr[i])
+#define              EleAt(s, i) ((s)->pExpr[i])
 MSequence *MSequence_InitStatic(MSequence *s, const MInt len);
 void       MSequence_ReleaseStatic(MSequence *s);
+void       MSequence_Shorten(MSequence *s, const int new_len);
 
 MExpr MExpr_CreateMachineInt(const MInt v);
 MExpr MExpr_CreateMachineUInt(const MUInt v);

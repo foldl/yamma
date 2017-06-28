@@ -54,16 +54,15 @@ morseEncode = If[Head @ morseEncode0[#] == String, morseEncode0[#], "????"] &;
 morseDecode = If[Head @ morseDecode0[#] == String, morseDecode0[#], "`" <> # <> "`"] &;
 
 setup = Function[{words},
-    fMap[Function[{item},
+    Map[Function[{item},
         (morseEncode0[#1] = #2; morseDecode0[#2] = #1) & @@ item
-    ], fPartition[words, 2]];
+    ], Partition[words, 2]];
     Null
 ];
 
-setup @ StrWords @ morseMap;
-morseMap =.;
+morseMap = setup @ StrWords @ morseMap;
 
-EncodeStr = StringJoin @@ Riffle[(morseEncode[#]& /@ Characters[UpperCase @ #]), "  "] &;
+EncodeStr = StringJoin @@ Riffle[(morseEncode[#]& /@ Characters[ToUpperCase @ #]), "  "] &;
 DecodeStr = StringJoin @@ (morseDecode[#]& /@ StrWords[#]) &;
 
 Print["SOS: ", EncodeStr @ "SOS"];

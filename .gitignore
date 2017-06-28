@@ -1,5 +1,7 @@
 *.swp
 *.bak
+*.un~
+dump.dat
 
 android/
 Build/

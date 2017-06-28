@@ -527,7 +527,8 @@ start_evaluate_param:
             // flatten
             if (attr & aFlat)
             {
-                MSequence *newSeq = BIF_Flatten_Header(expr->HeadSeq.pSequence, expr->HeadSeq.Head, pContext);
+                MSequence *newSeq = BIF_Flatten_Header(expr->HeadSeq.pSequence, sym_List->SymExpr, pContext);
+
                 if (newSeq)
                 {
                     MExpr t = expr;

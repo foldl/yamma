@@ -1,10 +1,10 @@
-msg_Generalappname = MSymbol_AddMsg(sym_General, "appname", "The name `1` is not valid for the application. A valid name starts with a letter and is followed by letters and digits.");
+msg_Generalappname = MSymbol_AddMsg(sym_General, "appname", "The name `1` is not valid for the application. A valid name starts with a letter followed by letters and digits.");
 msg_Generalargrx = MSymbol_AddMsg(sym_General, "argrx", "`1` called with `2` arguments; `3` arguments are expected.");
 msg_Generalargtyp = MSymbol_AddMsg(sym_General, "argtyp", "The `2`th argument of `1` is `3`; type `4` is expected.");
-msg_Generalargmore = MSymbol_AddMsg(sym_General, "argmore", "`1` called with only `2` arguments; more arguments are expected.");
+msg_Generalargmore = MSymbol_AddMsg(sym_General, "argmore", "`1` called with only `2` arguments; more arguments expected.");
 msg_Generalbktmcp = MSymbol_AddMsg(sym_General, "bktmcp", "Expression \"`1`\" has no closing \"`2`\".`4`");
 msg_Generalbktwrn = MSymbol_AddMsg(sym_General, "bktwrn", "\"`1`\" represents multiplication; use \"`2`\" to represent a function.`4`");
-msg_Generalcatname = MSymbol_AddMsg(sym_General, "catname", "The name `1` is not valid for the category. A valid name starts with a letter and is followed by letters and digits.");
+msg_Generalcatname = MSymbol_AddMsg(sym_General, "catname", "The name `1` is invalid for the category. A valid name starts with a letter followed by letters and digits.");
 msg_Generalfile = MSymbol_AddMsg(sym_General, "file", "The preferences file `1` is not a file.");
 msg_Generalnewsym = MSymbol_AddMsg(sym_General, "newsym", "Symbol `1` is new.", true);
 msg_Generalnosite = MSymbol_AddMsg(sym_General, "nosite", "Site `1` is not an existing Paclet site.");
